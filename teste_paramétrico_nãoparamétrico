@@ -1,0 +1,412 @@
+---
+title: "TAREFA 2 - Intervalos e Teste - Clássica x Bayesiana - INSTRUÇÃO"
+output:
+  pdf_document: default
+---
+
+Evandro M. Marquesim(00343797) e Gustavo Botega(00342691)
+
+# Preâmbulo
+
+```{r}
+install.packages('TeachingDemos')
+```
+
+```{r}
+library(TeachingDemos)
+```
+
+```{r}
+install.packages('BSDA')
+library(BSDA)
+
+```
+
+```{r}
+install.packages('DescTools')
+
+```
+
+```{r}
+library(DescTools)
+```
+
+## Criando Amostra
+
+```{r echo =TRUE}
+
+set.seed(343797)
+amostra = rnorm(20, 26000, 4000)
+amostra
+
+
+mean(amostra)
+
+
+```
+
+# **Hipóteses**
+
+### **H0 \<= 24000**
+
+### **Ha \> 24000**
+
+# A)
+
+# **Teste de normalidade Shapiro-Wilk**
+
+```{r echo = T}
+
+shapiro.test(amostra)
+```
+
+## **qqplot**
+
+```{r echo=TRUE}
+qqnorm(amostra)
+qqline(amostra)
+```
+
+## **Estatísticas amostrais**
+
+```{r echo = T}
+x_barra <- mean(amostra)
+sd_amostra <- sd(amostra)
+n <- dim(array(amostra))
+
+x_barra
+sd_amostra
+n
+```
+
+# 
+
+# **Box plot**
+
+```{r echo = T}
+boxplot(amostra, ylab = 'Durabilidade média do pneu em km',cex.lab = 1.4)
+```
+
+# Histograma
+
+```{r echo = TRUE}
+hist(amostra, xlab ='Durabilidade média do pneu em km', freq = F)
+lines(density(amostra))
+```
+
+### Dado o teste de normalidade realizado e as plotagens acima, atribui-se uma distribuição normal aos dados da amostra, assim como requisita o exercício.
+
+# **Média da hipótese**
+
+```{r echo = T}
+mu_0 = 24000
+```
+
+# **Estatística do teste (teorema central do limite)**
+
+```{r echo = TRUE}
+z0 <- (12-mu_0)/(sd_amostra/sqrt(n))
+z0
+
+```
+
+# **Z crítico**
+
+### **bilateral**
+
+```{r echo=TRUE}
+z_alfa <- qnorm(0.025, lower.tail = F) #para ficar positivo
+z_alfa
+```
+
+# 
+
+# **P-Valor**
+
+```{r echo = T}
+p_valor <- 2*pnorm(z0, lower.tail = F)
+p_valor
+```
+
+# **Critérios para rejeição da H0**
+
+#### **Se o módulo de z0 é maior do que z_alfa, rejeita-se a H0. No entanto, como pode-se constatar, o resultado é FALSO para essa afirmação nesse caso.**
+
+```{r echo=TRUE}
+abs(z0) > z_alfa
+
+```
+
+#### **Se o p_valor é menor do que alfa (0.05), rejeita-se a H0.**
+
+```{r echo=TRUE}
+p_valor < 0.05
+```
+
+# 
+
+# **Intervalo de confiança para mu**
+
+#### **[L;U] - L: limite inferior; U: Limite superior.**
+
+```{r echo=TRUE}
+L <- x_barra - z_alfa*sd_amostra/sqrt(n) #(z_alfa*sd_amostra/sqrt(n)) é uma margem de erro
+U <- x_barra + z_alfa*sd_amostra/sqrt(n)
+
+conc <- cat('[', round(L,5),',',round(U,5),']')
+conc
+```
+
+# **Visualizando região crítica**
+
+```{r echo=TRUE}
+x <- seq(-4,4,length = 500)
+y <- dnorm(x)
+plot(x, y, xlab = 'z', ylab = 'fdp', type = 'l')
+```
+
+### **Cauda esquerda**
+
+### 
+
+```{r echo=TRUE}
+x <- seq(-4,4,length = 500)
+y <- dnorm(x)
+plot(x, y, xlab = 'z', ylab = 'fdp', type = 'l')
+#----------------------------------------------------------
+x1 <- seq(-4, -z_alfa, length = 100)
+y1 <- dnorm(x1)
+polygon(c(-4, x1, -z_alfa), c(0,y1,0), col = 'red')
+```
+
+### 
+
+### **cauda direita**
+
+```{r echo=TRUE}
+x <- seq(-4,4,length = 500)
+y <- dnorm(x)
+plot(x, y, xlab = 'z', ylab = 'fdp', type = 'l')
+
+#------------------------------------------------
+x2 <- seq(z_alfa, 4, length = 100)
+y2 <- dnorm(x2)
+polygon(c(z_alfa, x2, 4), c(0,y2,0), col = 'red')
+
+```
+
+# **Visualizando p-valor**
+
+### **esquerda**
+
+```{r echo=TRUE}
+x <- seq(-4,4,length = 500)
+y <- dnorm(x)
+plot(x, y, xlab = 'z', ylab = 'fdp', type = 'l')
+
+x1 <- seq(-4, -z_alfa, length = 100)
+y1 <- dnorm(x1)
+polygon(c(-4, x1, -z_alfa), c(0,y1,0), col = 'red')
+
+x2 <- seq(z_alfa, 4, length = 100)
+y2 <- dnorm(x2)
+polygon(c(z_alfa, x2, 4), c(0,y2,0), col = 'red')
+
+#----------------------------------------------
+x3 <- seq(-4, z0, length = 100)
+y3 <- dnorm(x3)
+polygon(c(-4, x3, z0), c(0,y3,0), col = 'green')
+```
+
+#### **direita**
+
+```{r echo = TRUE}
+x <- seq(-4,4,length = 500)
+y <- dnorm(x)
+plot(x, y, xlab = 'z', ylab = 'fdp', type = 'l')
+
+x1 <- seq(-4, -z_alfa, length = 100)
+y1 <- dnorm(x1)
+polygon(c(-4, x1, -z_alfa), c(0,y1,0), col = 'red')
+
+x2 <- seq(z_alfa, 4, length = 100)
+y2 <- dnorm(x2)
+polygon(c(z_alfa, x2, 4), c(0,y2,0), col = 'red')
+
+#----------------------------------------------
+x4 <- seq(-z0, 4, length = 100)
+y4 <- dnorm(x4)
+polygon(c(-z0, x4, 4), c(0,y4,0), col = 'green')
+```
+
+# **All in**
+
+```{r echo=TRUE}
+x <- seq(-4,4,length = 500)
+y <- dnorm(x)
+
+
+plot(x, y, xlab = 'z', ylab = 'fdp', type = 'l')
+
+x1 <- seq(-4, -z_alfa, length = 100)
+y1 <- dnorm(x1)
+polygon(c(-4, x1, -z_alfa), c(0,y1,0), col = 'red')
+
+x2 <- seq(z_alfa, 4, length = 100)
+y2 <- dnorm(x2)
+polygon(c(z_alfa, x2, 4), c(0,y2,0), col = 'red')
+
+x3 <- seq(-4, z0, length = 100)
+y3 <- dnorm(x3)
+polygon(c(-4, x3, z0), c(0,y3,0), col = 'green')
+
+x4 <- seq(-z0, 4, length = 100)
+y4 <- dnorm(x4)
+polygon(c(-z0, x4, 4), c(0,y4,0), col = 'green')
+```
+
+# **Simplificando tudo**
+
+```{r echo=TRUE}
+
+ZTest(amostra, anternative = "two.sided", mu = mu_0, sd_pop = sd_amostra)
+
+?ZTest
+```
+
+# **Conclusão**
+
+### **Reconhecendo que a média populacional é devidamente conhecida, entende-se que um erro de tipo 2 (aceitar uma H0 falsa) está ocorrendo nos testes embasados na amostra de seed (343797).**
+
+# **B)**
+
+## **Parâmetros**
+
+```{r echo=TRUE}
+sigma = 3000
+n = 20
+xbar = mean(amostra)
+xbar
+sigma0_2 = 1500^2
+mu0 = 25000
+ep = sigma/sqrt(n)
+sigma2 = sigma^2
+sigma1_2 = 1/(n * (1/sigma2) + (1/sigma0_2))
+mu1 = (n * (1/sigma2) * xbar + (1/sigma0_2) * mu0)/((1/sigma0_2)+n*(1/sigma2))
+
+aux2=0.005  
+
+mu <- seq(xbar-5*ep,xbar+5*ep,0.1)
+ep
+oi <- xbar-5*ep
+oi2 <- xbar+5*ep
+oi
+oi2
+```
+
+## **priori**
+
+```{r echo=TRUE}
+par(mfrow=c(2,2))
+
+priori <- dnorm(mu, mu0, sqrt(sigma0_2))
+
+plot(c(xbar-5*ep,xbar+5*ep),c(0,aux2),type="n",xlab="mu")
+lines(mu,priori,col=4)
+title("Priori")
+
+```
+
+# Verossimilhança
+
+```{r echo =TRUE}
+veroP <- dnorm(mu, xbar, ep)
+
+plot(c(xbar-5*ep,xbar+5*ep),c(0,aux2),type="n",xlab="mu")
+lines(mu,veroP,col=3)
+title("Verossimilhanca Padronizada")
+
+```
+
+# Posteriori
+
+```{r echo=TRUE}
+posteriori <- dnorm(mu, mu1, sqrt(sigma1_2))
+
+plot(c(xbar-5*ep,xbar+5*ep),c(0,aux2),type="n",xlab="mu")
+lines(mu,posteriori,col=2)
+title("Posteriori")
+```
+
+# Triplot
+
+```{r echo = TRUE}
+plot(c(xbar-5*ep,xbar+5*ep),c(0,aux2),type="n",xlab="mu")
+lines(mu,priori,col=4)
+lines(mu,veroP,col=3)
+lines(mu,posteriori,col=2)
+title("Triplot")
+```
+
+# Estimação pontual
+
+```{r echo = TRUE}
+posteriori_f=function(mu) dnorm(mu, mu1, sqrt(sigma1_2))
+optimize(posteriori_f, interval=c(c(xbar-5*ep,xbar+5*ep)), maximum=T)
+
+media=mu1
+media
+mediana = qnorm(0.50, mean=mu1, sd=sqrt(sigma1_2))
+mediana
+moda = mu[posteriori==max(posteriori)]
+moda
+```
+
+#### 
+
+# Intervalo de credibilidade
+
+```{r echo=TRUE}
+hpd(qnorm, mean=mu1, sd=sqrt(sigma1_2))
+```
+
+#### Estima-se que a durabilidade média dos pneus é 24.930,08.
+
+#### Com 0,95 de probabilidade, estima-se que a durabilidade média dos pneus seja um número entre 23.729,85 e 26.130,31.
+
+#### Ponto
+
+```{r}
+ponto = 24000
+```
+
+# Probabilidade da media ser maior do que o ponto
+
+```{r echo = TRUE}
+1-pnorm(ponto,mu1,sqrt(sigma1_2))
+```
+
+# Probabilidade da media ser menor do que o ponto
+
+```{r echo=TRUE}
+pnorm(ponto,mu1,sqrt(sigma1_2))
+
+```
+
+#### 
+
+# Preditiva a Posteriori para uma nova observacao \< 24000
+
+```{r echo = TRUE}
+xtil=24000
+pnorm(xtil,mu1,sqrt(sigma2+sigma1_2))
+
+```
+
+#### A probabilidade de que uma nova amostra tenha média menor do que 24000 é 0,3806545.
+
+#### A probabilidade a posteriori da durabilidade média dos pneus ser maior que 24000 é 0,935595. Considerando a regra de rejeitar H0, se a probabilidade a posteriori de HA for maior que 0,95, não rejeita-se a H0. Com base nesses testes, não há evidências estatísticas (probabilidade a posteriori = 0.935595) para dizer que a durabilidade média dos pneus seja maior que 24000.
+
+# C)
+
+#### Como conclusão geral, ambos os testes apontem para um erro de tipo 2 dado a amostra gerada de seed (00343797).
