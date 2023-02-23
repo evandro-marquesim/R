@@ -1,0 +1,38 @@
+library(ggplot2)
+
+set.seed(00343797)
+n_simulacoes <- 1000
+n_amostras <- 30
+media <- 26000
+desvio_padrao <- 4000
+alfa <- seq(0, 1, by = 0.01)
+z_critical <- qnorm(1 - alfa/2)
+
+H0 <- 24000
+prop_rejeicao <- numeric(length(alfa))
+
+for (i in seq_along(alfa)) {
+  rejeitou <- numeric(n_simulacoes)
+  for (j in 1:n_simulacoes) {
+    amostra <- rnorm(n_amostras, mean = media, sd = desvio_padrao)
+    media_amostral <- mean(amostra)
+    erro_padrao_amostral <- sd(amostra) / sqrt(n_amostras)
+    z_score <- (media_amostral - H0) / erro_padrao_amostral
+    rejeitou[j] <- abs(z_score) > z_critical[i]
+  }
+  prop_rejeicao[i] <- mean(rejeitou)
+}
+
+confianca_relativa <- alfa * 2 - 1
+resultado_teste <- ifelse(prop_rejeicao > confianca_relativa, "Rejeitar H0", "Não rejeitar H0")
+df <- data.frame(Confianca = (1 - alfa), Prop_Rejeicao = prop_rejeicao, Resultado = resultado_teste)
+
+ggplot(df, aes(x = Confianca, y = Prop_Rejeicao)) +
+  geom_line(color = "steelblue") +
+  labs(title = "Relação entre confiança e proporção de rejeição de H0",
+       x = "Nível de confiança",
+       y = "Proporção de rejeição de H0") +
+  theme_minimal() +
+  geom_hline(yintercept = confianca_relativa, linetype = "dashed", color = "white") +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent)
